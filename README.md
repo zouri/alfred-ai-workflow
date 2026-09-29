@@ -4,6 +4,19 @@ Chat with OpenAI, DeepSeek, or another OpenAI-compatible API; generate images wi
 
 Forked from [alfredapp/openai-workflow](https://github.com/alfredapp/openai-workflow). The [Alfred Gallery listing](https://alfred.app/workflows/alfredapp/openai) installs the original OpenAI-only workflow, not this fork.
 
+## Install
+
+This fork is not published in the Alfred Gallery. On macOS, clone the repository and package the `Workflow` directory, then double-click the resulting `.alfredworkflow` file:
+
+```sh
+git clone https://github.com/zouri/alfred-ai-workflow.git
+cd alfred-ai-workflow/Workflow
+zip -r ../alfred-ai-workflow.alfredworkflow .
+open ../alfred-ai-workflow.alfredworkflow
+```
+
+Alfred 5 with Powerpack is required. This fork has its own Bundle ID, so it can coexist with the original workflow; Alfred stores its configuration and chat history separately. If both are enabled, change the **Chat Keyword** in one workflow to avoid a `chatgpt` keyword conflict.
+
 ## Setup
 
 In the [Workflow Configuration](https://www.alfredapp.com/help/workflows/user-configuration/), choose a **Chat Provider**:
