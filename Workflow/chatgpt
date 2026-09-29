@@ -61,6 +61,15 @@ function markdownChat(messages, ignoreLastInterrupted = true) {
 function chatConfiguration() {
   const provider = envVar("chat_provider") || "openai"
   const openaiEndpoint = envVar("chatgpt_api_endpoint") || "https://api.openai.com/v1/chat/completions"
+  // Chat Completions endpoints for providers listed in new-api's channel presets.
+  const providerEndpoints = {
+    deepseek: "https://api.deepseek.com/chat/completions",
+    openrouter: "https://openrouter.ai/api/v1/chat/completions",
+    qwen: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+    moonshot: "https://api.moonshot.cn/v1/chat/completions",
+    siliconflow: "https://api.siliconflow.cn/v1/chat/completions",
+    xai: "https://api.x.ai/v1/chat/completions"
+  }
   const settings = {
     openai: {
       key: envVar("openai_api_key"),
@@ -68,19 +77,18 @@ function chatConfiguration() {
       model: envVar("chatgpt_model_override") || envVar("gpt_model"),
       headers: envVar("openai_org_id") ? ["--header", `OpenAI-Organization: ${envVar("openai_org_id")}`] : []
     },
-    deepseek: {
-      key: envVar("chat_api_key"),
-      endpoint: "https://api.deepseek.com/chat/completions",
-      model: envVar("chat_model") || "deepseek-flash",
-      headers: []
-    },
     custom: {
       key: envVar("chat_api_key"),
       endpoint: envVar("chat_api_endpoint"),
       model: envVar("chat_model"),
       headers: []
     }
-  }[provider]
+  }[provider] || (providerEndpoints[provider] ? {
+    key: envVar("chat_api_key"),
+    endpoint: providerEndpoints[provider],
+    model: envVar("chat_model") || (provider === "deepseek" ? "deepseek-flash" : ""),
+    headers: []
+  } : undefined)
 
   if (!settings) return { error: `Unknown chat provider: ${provider}` }
   if (!settings.key) return { error: `Set the ${provider === "openai" ? "OpenAI API Key" : "Chat API Key"} in Workflow Configuration.` }

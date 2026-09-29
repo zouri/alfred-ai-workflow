@@ -8,11 +8,14 @@ Forked from [alfredapp/openai-workflow](https://github.com/alfredapp/openai-work
 
 In the [Workflow Configuration](https://www.alfredapp.com/help/workflows/user-configuration/), choose a **Chat Provider**:
 
-* **OpenAI** (default): Set an [OpenAI API key](https://platform.openai.com/api-keys) and choose an OpenAI model from **Model**.
+* **OpenAI** (default): Set an [OpenAI API key](https://platform.openai.com/api-keys) and choose an **OpenAI Model**.
 * **DeepSeek**: Set a [DeepSeek API key](https://platform.deepseek.com/api_keys) in **Chat API Key**. The default chat model is `deepseek-flash`; use **Chat Model** to override it.
+* **OpenRouter, Qwen (Alibaba Cloud), Moonshot (Kimi), SiliconFlow, or xAI**: Set that provider's key in **Chat API Key** and its model ID in **Chat Model**. The workflow supplies the provider's Chat Completions endpoint.
 * **Other OpenAI-compatible API**: Set **Chat API Key**, **Chat API Endpoint**, and **Chat Model**. The endpoint can be an HTTPS base URL (such as `https://api.example.com/v1`) or a full `/chat/completions` URL. The provider must support streamed Chat Completions responses.
 
-DALL·E always uses the OpenAI API key, regardless of the chat provider. The OpenAI organization ID is likewise only sent to OpenAI. Existing OpenAI settings and the `chatgpt` keyword continue to work.
+DALL·E always uses the OpenAI API key, regardless of the chat provider. The OpenAI organization ID is likewise only sent to OpenAI. Existing OpenAI settings and the `chatgpt` keyword continue to work. The non-OpenAI providers share one **Chat API Key** field, so update it when switching providers. Qwen uses the Beijing endpoint; use **Other** to specify a different region or workspace URL.
+
+These presets are a small subset of the [new-api channel list](https://github.com/QuantumNous/new-api/blob/main/constant/channel.go). Providers using a different request protocol or authentication scheme are not included.
 
 ## Usage
 

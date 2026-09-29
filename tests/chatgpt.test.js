@@ -37,6 +37,26 @@ test("DeepSeek uses its own key, endpoint, and default model", () => {
   assert.equal(config.headers.length, 0)
 })
 
+test("provider presets use their Chat Completions endpoints", () => {
+  const endpoints = {
+    openrouter: "https://openrouter.ai/api/v1/chat/completions",
+    qwen: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+    moonshot: "https://api.moonshot.cn/v1/chat/completions",
+    siliconflow: "https://api.siliconflow.cn/v1/chat/completions",
+    xai: "https://api.x.ai/v1/chat/completions"
+  }
+
+  for (const [provider, endpoint] of Object.entries(endpoints)) {
+    const config = configuration({ chat_provider: provider, chat_api_key: "provider-key", chat_model: "model-id" })
+    assert.equal(config.endpoint, endpoint, provider)
+    assert.equal(config.model, "model-id", provider)
+    assert.equal(config.key, "provider-key", provider)
+    assert.equal(config.headers.length, 0, provider)
+    assert.match(configuration({ chat_provider: provider, chat_api_key: "provider-key" }).error,
+      /Chat Model/, provider)
+  }
+})
+
 test("custom provider accepts a base URL or a complete endpoint", () => {
   const base = { chat_provider: "custom", chat_api_key: "custom-key", chat_model: "model-a" }
   assert.equal(configuration({ ...base, chat_api_endpoint: "https://example.com/v1/" }).endpoint,

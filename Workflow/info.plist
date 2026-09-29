@@ -1938,11 +1938,14 @@ function run() {
 
 In the [Workflow Configuration](https://www.alfredapp.com/help/workflows/user-configuration/), choose a **Chat Provider**:
 
-* **OpenAI** (default): Set an [OpenAI API key](https://platform.openai.com/api-keys) and choose an OpenAI model from **Model**.
+* **OpenAI** (default): Set an [OpenAI API key](https://platform.openai.com/api-keys) and choose an **OpenAI Model**.
 * **DeepSeek**: Set a [DeepSeek API key](https://platform.deepseek.com/api_keys) in **Chat API Key**. The default chat model is `deepseek-flash`; use **Chat Model** to override it.
+* **OpenRouter, Qwen (Alibaba Cloud), Moonshot (Kimi), SiliconFlow, or xAI**: Set that provider's key in **Chat API Key** and its model ID in **Chat Model**. The workflow supplies the provider's Chat Completions endpoint.
 * **Other OpenAI-compatible API**: Set **Chat API Key**, **Chat API Endpoint**, and **Chat Model**. The endpoint can be an HTTPS base URL or a full `/chat/completions` URL. The provider must support streamed Chat Completions responses.
 
-DALL·E always uses the OpenAI API key, regardless of the chat provider. Existing OpenAI settings and the `chatgpt` keyword continue to work.
+DALL·E always uses the OpenAI API key, regardless of the chat provider. Existing OpenAI settings and the `chatgpt` keyword continue to work. Non-OpenAI providers share one **Chat API Key** field; update it when switching providers. Qwen uses the Beijing endpoint; use **Other** for a different region or workspace URL.
+
+These presets are a subset of the [new-api channel list](https://github.com/QuantumNous/new-api/blob/main/constant/channel.go). Providers requiring a different request protocol or authentication scheme are not included.
 
 ## Usage
 
@@ -2363,6 +2366,11 @@ Query DALL·E via the `dalle` keyword.
 				<array>
 					<array><string>OpenAI</string><string>openai</string></array>
 					<array><string>DeepSeek</string><string>deepseek</string></array>
+					<array><string>OpenRouter</string><string>openrouter</string></array>
+					<array><string>Qwen (Alibaba Cloud)</string><string>qwen</string></array>
+					<array><string>Moonshot (Kimi)</string><string>moonshot</string></array>
+					<array><string>SiliconFlow</string><string>siliconflow</string></array>
+					<array><string>xAI</string><string>xai</string></array>
 					<array><string>Other OpenAI-compatible API</string><string>custom</string></array>
 				</array>
 			</dict>
@@ -2409,7 +2417,7 @@ Query DALL·E via the `dalle` keyword.
 				<true/>
 			</dict>
 			<key>description</key>
-			<string>Used for DeepSeek or another chat provider, not DALL·E.</string>
+			<string>Used for any non-OpenAI chat provider, not DALL·E.</string>
 			<key>label</key>
 			<string>Chat API Key</string>
 			<key>type</key>
@@ -2451,7 +2459,7 @@ Query DALL·E via the `dalle` keyword.
 				<true/>
 			</dict>
 			<key>description</key>
-			<string>DeepSeek defaults to deepseek-flash. Required for Other.</string>
+			<string>DeepSeek defaults to deepseek-flash. Required for other non-OpenAI providers.</string>
 			<key>label</key>
 			<string>Chat Model</string>
 			<key>type</key>
