@@ -1943,7 +1943,7 @@ In the [Workflow Configuration](https://www.alfredapp.com/help/workflows/user-co
 * **OpenRouter, Qwen (Alibaba Cloud), Moonshot (Kimi), SiliconFlow, xAI, Mistral, Perplexity Router, Zhipu GLM, or Volcengine Ark (Doubao)**: Set that provider's key in **Chat API Key** and its model ID in **Chat Model**. The workflow supplies the provider's Chat Completions endpoint.
 * **Other OpenAI-compatible API**: Set **Chat API Key**, **Chat API Endpoint**, and **Chat Model**. The endpoint can be an HTTPS base URL or a full `/chat/completions` URL. The provider must support streamed Chat Completions responses.
 
-DALL·E always uses the OpenAI API key, regardless of the chat provider. Existing OpenAI settings and the `chatgpt` keyword continue to work. Non-OpenAI providers share one **Chat API Key** field; update it when switching providers. Qwen and Volcengine Ark use Beijing endpoints; use **Other** for a different region or workspace URL. Perplexity Router requires a Router model ID, not a Sonar model ID.
+DALL·E always uses the OpenAI API key, regardless of the chat provider. Existing OpenAI settings remain compatible; the chat keyword defaults to `ask`. Non-OpenAI providers share one **Chat API Key** field; update it when switching providers. Qwen and Volcengine Ark use Beijing endpoints; use **Other** for a different region or workspace URL. Perplexity Router requires a Router model ID, not a Sonar model ID.
 
 These presets are a subset of the [new-api channel list](https://github.com/QuantumNous/new-api/blob/main/constant/channel.go), restricted to HTTPS Chat Completions endpoints with Bearer-key authentication. Providers requiring a different request protocol or authentication scheme are not included.
 
@@ -1951,9 +1951,7 @@ These presets are a subset of the [new-api channel list](https://github.com/Quan
 
 ### Chat
 
-Query your selected chat provider via the `chatgpt` keyword, the [Universal Action](https://www.alfredapp.com/help/features/universal-actions/), or the [Fallback Search](https://www.alfredapp.com/help/features/default-results/fallback-searches/).
-
-![Start ChatGPT query](images/about/chatgptkeyword.png)
+Query your selected chat provider via the `ask` keyword, the [Universal Action](https://www.alfredapp.com/help/features/universal-actions/), or the [Fallback Search](https://www.alfredapp.com/help/features/default-results/fallback-searches/).
 
 ![Querying ChatGPT](images/about/chatgpttextview.png)
 
@@ -1965,7 +1963,7 @@ Query your selected chat provider via the `chatgpt` keyword, the [Universal Acti
 
 #### Chat History
 
-View Chat History with ⌥↩ in the `chatgpt` keyword. Each result shows the first question as the title and the last as the subtitle.
+View Chat History with ⌥↩ in the `ask` keyword. Each result shows the first question as the title and the last as the subtitle.
 
 ![Viewing chat histories](images/about/chatgpthistory.png)
 
@@ -2475,7 +2473,7 @@ Query DALL·E via the `dalle` keyword.
 			<key>config</key>
 			<dict>
 				<key>default</key>
-				<string>chatgpt</string>
+				<string>ask</string>
 				<key>placeholder</key>
 				<string></string>
 				<key>required</key>

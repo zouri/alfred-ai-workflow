@@ -15,7 +15,7 @@ zip -r ../alfred-ai-workflow.alfredworkflow .
 open ../alfred-ai-workflow.alfredworkflow
 ```
 
-Alfred 5 with Powerpack is required. This fork has its own Bundle ID, so it can coexist with the original workflow; Alfred stores its configuration and chat history separately. If both are enabled, change the **Chat Keyword** in one workflow to avoid a `chatgpt` keyword conflict.
+Alfred 5 with Powerpack is required. This fork has its own Bundle ID and uses `ask` as its default chat keyword, so it can coexist with the original workflow. Alfred stores its configuration and chat history separately.
 
 ## Setup
 
@@ -26,7 +26,7 @@ In the [Workflow Configuration](https://www.alfredapp.com/help/workflows/user-co
 * **OpenRouter, Qwen (Alibaba Cloud), Moonshot (Kimi), SiliconFlow, xAI, Mistral, Perplexity Router, Zhipu GLM, or Volcengine Ark (Doubao)**: Set that provider's key in **Chat API Key** and its model ID in **Chat Model**. The workflow supplies the provider's Chat Completions endpoint.
 * **Other OpenAI-compatible API**: Set **Chat API Key**, **Chat API Endpoint**, and **Chat Model**. The endpoint can be an HTTPS base URL (such as `https://api.example.com/v1`) or a full `/chat/completions` URL. The provider must support streamed Chat Completions responses.
 
-DALL·E always uses the OpenAI API key, regardless of the chat provider. The OpenAI organization ID is likewise only sent to OpenAI. Existing OpenAI settings and the `chatgpt` keyword continue to work. The non-OpenAI providers share one **Chat API Key** field, so update it when switching providers. Qwen and Volcengine Ark use their Beijing endpoints; use **Other** to specify a different region or workspace URL. Perplexity Router requires a [Router model ID](https://docs.perplexity.ai/docs/getting-started/quickstart), not a Sonar model ID.
+DALL·E always uses the OpenAI API key, regardless of the chat provider. The OpenAI organization ID is likewise only sent to OpenAI. Existing OpenAI settings remain compatible; the chat keyword defaults to `ask`. The non-OpenAI providers share one **Chat API Key** field, so update it when switching providers. Qwen and Volcengine Ark use their Beijing endpoints; use **Other** to specify a different region or workspace URL. Perplexity Router requires a [Router model ID](https://docs.perplexity.ai/docs/getting-started/quickstart), not a Sonar model ID.
 
 These presets are a subset of the [new-api channel list](https://github.com/QuantumNous/new-api/blob/main/constant/channel.go), restricted to HTTPS Chat Completions endpoints with Bearer-key authentication. Providers using a different request protocol or authentication scheme are not included.
 
@@ -34,9 +34,7 @@ These presets are a subset of the [new-api channel list](https://github.com/Quan
 
 ### Chat
 
-Query your selected chat provider via the `chatgpt` keyword (customizable in Workflow Configuration), the [Universal Action](https://www.alfredapp.com/help/features/universal-actions/), or the [Fallback Search](https://www.alfredapp.com/help/features/default-results/fallback-searches/).
-
-![Start ChatGPT query](Workflow/images/about/chatgptkeyword.png)
+Query your selected chat provider via the `ask` keyword (customizable in Workflow Configuration), the [Universal Action](https://www.alfredapp.com/help/features/universal-actions/), or the [Fallback Search](https://www.alfredapp.com/help/features/default-results/fallback-searches/).
 
 ![Querying ChatGPT](Workflow/images/about/chatgpttextview.png)
 
@@ -48,7 +46,7 @@ Query your selected chat provider via the `chatgpt` keyword (customizable in Wor
 
 #### Chat History
 
-View Chat History with ⌥↩&#xFE0E; in the `chatgpt` keyword. Each result shows the first question as the title and the last as the subtitle.
+View Chat History with ⌥↩&#xFE0E; in the `ask` keyword. Each result shows the first question as the title and the last as the subtitle.
 
 ![Viewing chat histories](Workflow/images/about/chatgpthistory.png)
 
