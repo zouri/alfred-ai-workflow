@@ -58,6 +58,45 @@ function markdownChat(messages, ignoreLastInterrupted = true) {
   }, "")
 }
 
+function chatConfiguration() {
+  const provider = envVar("chat_provider") || "openai"
+  const openaiEndpoint = envVar("chatgpt_api_endpoint") || "https://api.openai.com/v1/chat/completions"
+  const settings = {
+    openai: {
+      key: envVar("openai_api_key"),
+      endpoint: openaiEndpoint,
+      model: envVar("chatgpt_model_override") || envVar("gpt_model"),
+      headers: envVar("openai_org_id") ? ["--header", `OpenAI-Organization: ${envVar("openai_org_id")}`] : []
+    },
+    deepseek: {
+      key: envVar("chat_api_key"),
+      endpoint: "https://api.deepseek.com/chat/completions",
+      model: envVar("chat_model") || "deepseek-flash",
+      headers: []
+    },
+    custom: {
+      key: envVar("chat_api_key"),
+      endpoint: envVar("chat_api_endpoint"),
+      model: envVar("chat_model"),
+      headers: []
+    }
+  }[provider]
+
+  if (!settings) return { error: `Unknown chat provider: ${provider}` }
+  if (!settings.key) return { error: `Set the ${provider === "openai" ? "OpenAI API Key" : "Chat API Key"} in Workflow Configuration.` }
+  if (!settings.model) return { error: "Set the Chat Model in Workflow Configuration." }
+  if (!settings.endpoint) return { error: "Set the Chat API Endpoint in Workflow Configuration." }
+
+  const endpoint = settings.endpoint.replace(/\/+$/, "")
+  if (!/^https:\/\/[^/?#\s]+(?:\/[^?#\s]*)?$/.test(endpoint))
+    return { error: "Chat API Endpoint must be an HTTPS URL." }
+
+  const path = endpoint.replace(/^https:\/\/[^/]+/, "")
+  settings.endpoint = (provider === "openai" && path && path !== "/v1") || endpoint.endsWith("/chat/completions") ? endpoint :
+    `${endpoint}${path ? "" : "/v1"}/chat/completions`
+  return settings
+}
+
 function startStream(apiEndpoint, apiKey, apiOrgHeader, model, systemPrompt, contextChat, streamFile, pidStreamFile, timeoutSeconds) {
   $.NSFileManager.defaultManager.createFileAtPathContentsAttributes(streamFile, undefined, undefined) // Create empty file
 
@@ -197,13 +236,7 @@ function run(argv) {
   const typedQuery = argv[0]
   const maxContext = parseInt(envVar("max_context"))
   const timeoutSeconds = parseInt(envVar("timeout_seconds"))
-  const apiKey = envVar("openai_api_key")
-  const apiOrgHeader = envVar("openai_org_id") ? ["--header", `OpenAI-Organization: ${envVar("openai_org_id")}`] : []
-  const apiEndpointInit = envVar("chatgpt_api_endpoint") || "https://api.openai.com/v1/chat/completions"
-  const apiEndpointInitHasPath = apiEndpointInit.replace(/^https?:\/\//, "").includes("/")
-  const apiEndpoint = apiEndpointInitHasPath ? apiEndpointInit : `${apiEndpointInit}/v1/chat/completions`
   const systemPrompt = envVar("system_prompt")
-  const model = envVar("chatgpt_model_override") ? envVar("chatgpt_model_override") : envVar("gpt_model")
   const chatFile = `${envVar("alfred_workflow_data")}/chat.json`
   const pidStreamFile = `${envVar("alfred_workflow_cache")}/pid.txt`
   const streamFile = `${envVar("alfred_workflow_cache")}/stream.txt`
@@ -230,13 +263,16 @@ function run(argv) {
     behaviour: { scroll: "end" }
   })
 
+  const chatApi = chatConfiguration()
+  if (chatApi.error) return JSON.stringify({ response: chatApi.error })
+
   // Append new question to chat
   const appendQuery = { role: "user", content: typedQuery }
   const ongoingChat = previousChat.concat(appendQuery)
   const contextChat = ongoingChat.slice(-maxContext)
 
   // Make API request, write chat file, and start loop
-  startStream(apiEndpoint, apiKey, apiOrgHeader, model, systemPrompt, contextChat, streamFile, pidStreamFile, timeoutSeconds)
+  startStream(chatApi.endpoint, chatApi.key, chatApi.headers, chatApi.model, systemPrompt, contextChat, streamFile, pidStreamFile, timeoutSeconds)
   appendChat(chatFile, appendQuery)
 
   return JSON.stringify({

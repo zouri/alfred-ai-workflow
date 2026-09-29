@@ -1,21 +1,24 @@
-# <img src='Workflow/icon.png' width='45' align='center' alt='icon'> ChatGPT / DALL-E Alfred Workflow
+# <img src='Workflow/icon.png' width='45' align='center' alt='icon'> Alfred AI Workflow
 
-OpenAI integrations
+Chat with OpenAI, DeepSeek, or another OpenAI-compatible API; generate images with OpenAI.
 
-[⤓ Install on the Alfred Gallery](https://alfred.app/workflows/alfredapp/openai)
+Forked from [alfredapp/openai-workflow](https://github.com/alfredapp/openai-workflow). The [Alfred Gallery listing](https://alfred.app/workflows/alfredapp/openai) installs the original OpenAI-only workflow, not this fork.
 
 ## Setup
 
-1. Create an OpenAI account and [log in](https://platform.openai.com/login?launch).
-2. On the [API keys page](https://platform.openai.com/api-keys), click `+ Create new secret key`.
-3. Name your new secret key and click `Create secret key`.
-4. Copy your secret key and add it to the [Workflow’s Configuration](https://www.alfredapp.com/help/workflows/user-configuration/).
+In the [Workflow Configuration](https://www.alfredapp.com/help/workflows/user-configuration/), choose a **Chat Provider**:
+
+* **OpenAI** (default): Set an [OpenAI API key](https://platform.openai.com/api-keys) and choose an OpenAI model from **Model**.
+* **DeepSeek**: Set a [DeepSeek API key](https://platform.deepseek.com/api_keys) in **Chat API Key**. The default chat model is `deepseek-flash`; use **Chat Model** to override it.
+* **Other OpenAI-compatible API**: Set **Chat API Key**, **Chat API Endpoint**, and **Chat Model**. The endpoint can be an HTTPS base URL (such as `https://api.example.com/v1`) or a full `/chat/completions` URL. The provider must support streamed Chat Completions responses.
+
+DALL·E always uses the OpenAI API key, regardless of the chat provider. The OpenAI organization ID is likewise only sent to OpenAI. Existing OpenAI settings and the `chatgpt` keyword continue to work.
 
 ## Usage
 
-### ChatGPT
+### Chat
 
-Query ChatGPT via the `chatgpt` keyword, the [Universal Action](https://www.alfredapp.com/help/features/universal-actions/), or the [Fallback Search](https://www.alfredapp.com/help/features/default-results/fallback-searches/).
+Query your selected chat provider via the `chatgpt` keyword (customizable in Workflow Configuration), the [Universal Action](https://www.alfredapp.com/help/features/universal-actions/), or the [Fallback Search](https://www.alfredapp.com/help/features/default-results/fallback-searches/).
 
 ![Start ChatGPT query](Workflow/images/about/chatgptkeyword.png)
 

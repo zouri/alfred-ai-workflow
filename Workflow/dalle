@@ -110,6 +110,11 @@ function run(argv) {
     behaviour: { scroll: "end" }
   })
 
+  if (!apiKey) return JSON.stringify({
+    variables: { loaded_previous: true },
+    response: "Set the OpenAI API Key in Workflow Configuration to generate images."
+  })
+
   // Send request
   const task = $.NSTask.alloc.init
   const stdout = $.NSPipe.pipe

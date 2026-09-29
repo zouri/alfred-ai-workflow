@@ -720,11 +720,11 @@
 	<key>createdby</key>
 	<string>Vítor Galvão</string>
 	<key>description</key>
-	<string>OpenAI integrations</string>
+	<string>Chat with OpenAI, DeepSeek, or another compatible API; generate images with OpenAI.</string>
 	<key>disabled</key>
 	<false/>
 	<key>name</key>
-	<string>ChatGPT / DALL-E</string>
+	<string>Alfred AI Workflow</string>
 	<key>objects</key>
 	<array>
 		<dict>
@@ -761,7 +761,7 @@
 				<key>acceptsurls</key>
 				<false/>
 				<key>name</key>
-				<string>Ask ChatGPT</string>
+				<string>Ask AI</string>
 			</dict>
 			<key>type</key>
 			<string>alfred.workflow.trigger.universalaction</string>
@@ -1218,7 +1218,7 @@ kill "${pid_stream}"
 			<key>config</key>
 			<dict>
 				<key>text</key>
-				<string>Ask ChatGPT '{query}'</string>
+				<string>Ask AI '{query}'</string>
 			</dict>
 			<key>type</key>
 			<string>alfred.workflow.trigger.fallback</string>
@@ -1317,7 +1317,7 @@ function run() {
 				<key>inputtype</key>
 				<integer>1</integer>
 				<key>loadingtext</key>
-				<string>Querying ChatGPT API…</string>
+				<string>Querying chat API…</string>
 				<key>outputmode</key>
 				<integer>1</integer>
 				<key>scriptinput</key>
@@ -1468,7 +1468,7 @@ function run() {
 				<key>subtext</key>
 				<string>↩ Continue chat · ⌘↩ New chat · ⌥↩ Chat history</string>
 				<key>text</key>
-				<string>Ask ChatGPT</string>
+				<string>Ask AI</string>
 				<key>withspace</key>
 				<true/>
 			</dict>
@@ -1936,16 +1936,19 @@ function run() {
 	<key>readme</key>
 	<string>## Setup
 
-1. Create an OpenAI account and [log in](https://platform.openai.com/login?launch).
-2. On the [API keys page](https://platform.openai.com/api-keys), click `+ Create new secret key`.
-3. Name your new secret key and click `Create secret key`.
-4. Copy your secret key and add it to the [Workflow’s Configuration](https://www.alfredapp.com/help/workflows/user-configuration/).
+In the [Workflow Configuration](https://www.alfredapp.com/help/workflows/user-configuration/), choose a **Chat Provider**:
+
+* **OpenAI** (default): Set an [OpenAI API key](https://platform.openai.com/api-keys) and choose an OpenAI model from **Model**.
+* **DeepSeek**: Set a [DeepSeek API key](https://platform.deepseek.com/api_keys) in **Chat API Key**. The default chat model is `deepseek-flash`; use **Chat Model** to override it.
+* **Other OpenAI-compatible API**: Set **Chat API Key**, **Chat API Endpoint**, and **Chat Model**. The endpoint can be an HTTPS base URL or a full `/chat/completions` URL. The provider must support streamed Chat Completions responses.
+
+DALL·E always uses the OpenAI API key, regardless of the chat provider. Existing OpenAI settings and the `chatgpt` keyword continue to work.
 
 ## Usage
 
-### ChatGPT
+### Chat
 
-Query ChatGPT via the `chatgpt` keyword, the [Universal Action](https://www.alfredapp.com/help/features/universal-actions/), or the [Fallback Search](https://www.alfredapp.com/help/features/default-results/fallback-searches/).
+Query your selected chat provider via the `chatgpt` keyword, the [Universal Action](https://www.alfredapp.com/help/features/universal-actions/), or the [Fallback Search](https://www.alfredapp.com/help/features/default-results/fallback-searches/).
 
 ![Start ChatGPT query](images/about/chatgptkeyword.png)
 
@@ -2355,22 +2358,106 @@ Query DALL·E via the `dalle` keyword.
 			<key>config</key>
 			<dict>
 				<key>default</key>
+				<string>openai</string>
+				<key>pairs</key>
+				<array>
+					<array><string>OpenAI</string><string>openai</string></array>
+					<array><string>DeepSeek</string><string>deepseek</string></array>
+					<array><string>Other OpenAI-compatible API</string><string>custom</string></array>
+				</array>
+			</dict>
+			<key>description</key>
+			<string>Choose the provider for chat. Image generation always uses OpenAI.</string>
+			<key>label</key>
+			<string>Chat Provider</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>variable</key>
+			<string>chat_provider</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
 				<string></string>
 				<key>placeholder</key>
 				<string></string>
 				<key>required</key>
-				<true/>
+				<false/>
 				<key>trim</key>
 				<true/>
 			</dict>
 			<key>description</key>
-			<string>Get it at https://platform.openai.com/api-keys</string>
+			<string>For OpenAI chat and DALL·E. Get it at https://platform.openai.com/api-keys</string>
 			<key>label</key>
 			<string>OpenAI API Key</string>
 			<key>type</key>
 			<string>textfield</string>
 			<key>variable</key>
 			<string>openai_api_key</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>DeepSeek or compatible provider API key</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>Used for DeepSeek or another chat provider, not DALL·E.</string>
+			<key>label</key>
+			<string>Chat API Key</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>chat_api_key</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>e.g. https://api.example.com/v1</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>For Other only. HTTPS base URL or full /chat/completions URL.</string>
+			<key>label</key>
+			<string>Chat API Endpoint</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>chat_api_endpoint</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>e.g. deepseek-flash</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>DeepSeek defaults to deepseek-flash. Required for Other.</string>
+			<key>label</key>
+			<string>Chat Model</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>chat_model</string>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -2470,9 +2557,9 @@ Query DALL·E via the `dalle` keyword.
 				</array>
 			</dict>
 			<key>description</key>
-			<string></string>
+			<string>Used when Chat Provider is OpenAI.</string>
 			<key>label</key>
-			<string>Model</string>
+			<string>OpenAI Model</string>
 			<key>type</key>
 			<string>popupbutton</string>
 			<key>variable</key>
@@ -2541,7 +2628,7 @@ Query DALL·E via the `dalle` keyword.
 				<integer>3</integer>
 			</dict>
 			<key>description</key>
-			<string>Initial message to guide ChatGPT on the answers you expect. Supported on select models.</string>
+			<string>Initial message to guide chat answers. Supported on select models.</string>
 			<key>label</key>
 			<string>System Prompt</string>
 			<key>type</key>
@@ -2718,6 +2805,6 @@ Query DALL·E via the `dalle` keyword.
 	<key>version</key>
 	<string>26.1</string>
 	<key>webaddress</key>
-	<string>https://github.com/alfredapp/openai-workflow/</string>
+	<string>https://github.com/zouri/alfred-ai-workflow/</string>
 </dict>
 </plist>
