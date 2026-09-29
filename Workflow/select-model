@@ -1,0 +1,28 @@
+#!/usr/bin/osascript -l JavaScript
+
+function envVar(name) {
+  return $.NSProcessInfo.processInfo.environment.objectForKey(name).js
+}
+
+function run(argv) {
+  const model = (argv[0] || "").trim()
+  if (!model) return "No model selected"
+
+  const provider = envVar("chat_provider") || "openai"
+  const selectionKey = provider === "custom" ? `custom:${envVar("chat_api_endpoint")}` : provider
+  const dataDir = envVar("alfred_workflow_data")
+  const path = `${dataDir}/models.json`
+  const manager = $.NSFileManager.defaultManager
+  manager.createDirectoryAtPathWithIntermediateDirectoriesAttributesError(dataDir, true, undefined, undefined)
+
+  let selections = {}
+  if (manager.fileExistsAtPath(path)) {
+    try {
+      const content = $.NSString.stringWithContentsOfFileEncodingError(path, $.NSUTF8StringEncoding, undefined).js
+      selections = JSON.parse(content)
+    } catch {}
+  }
+  selections[selectionKey] = model
+  $(JSON.stringify(selections)).writeToFileAtomicallyEncodingError(path, true, $.NSUTF8StringEncoding, undefined)
+  return `${provider}: ${model}`
+}

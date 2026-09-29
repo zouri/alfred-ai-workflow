@@ -21,10 +21,11 @@ Alfred 5 with Powerpack is required. This fork has its own Bundle ID and uses `a
 
 In the [Workflow Configuration](https://www.alfredapp.com/help/workflows/user-configuration/), choose a **Chat Provider**:
 
-* **OpenAI** (default): Set an [OpenAI API key](https://platform.openai.com/api-keys) and choose an **OpenAI Model**.
-* **DeepSeek**: Set a [DeepSeek API key](https://platform.deepseek.com/api_keys) in **Chat API Key**. The default chat model is `deepseek-flash`; use **Chat Model** to override it.
-* **OpenRouter, Qwen (Alibaba Cloud), Moonshot (Kimi), SiliconFlow, xAI, Mistral, Perplexity Router, Zhipu GLM, or Volcengine Ark (Doubao)**: Set that provider's key in **Chat API Key** and its model ID in **Chat Model**. The workflow supplies the provider's Chat Completions endpoint.
-* **Other OpenAI-compatible API**: Set **Chat API Key**, **Chat API Endpoint**, and **Chat Model**. The endpoint can be an HTTPS base URL (such as `https://api.example.com/v1`) or a full `/chat/completions` URL. The provider must support streamed Chat Completions responses.
+* **OpenAI** (default): Set an [OpenAI API key](https://platform.openai.com/api-keys).
+* **DeepSeek, OpenRouter, Qwen (Alibaba Cloud), Moonshot (Kimi), SiliconFlow, xAI, Mistral, Perplexity Router, Zhipu GLM, or Volcengine Ark (Doubao)**: Set that provider's key in **Chat API Key**.
+* **Other OpenAI-compatible API**: Set **Chat API Key** and **Chat API Endpoint**. The endpoint can be an HTTPS base URL (such as `https://api.example.com/v1`) or a full `/chat/completions` URL. The provider must support streamed Chat Completions responses.
+
+After choosing a provider, run `askmodel` in Alfred to fetch and select one of its models. The selection is saved separately for each provider, so switching providers also switches models. If a provider does not expose a compatible model list, type the exact model ID after `askmodel` and select the manual entry. The **OpenAI Model** and **Custom Model** configuration fields are fallbacks when no model has been selected. After upgrading from an earlier version, select a model once for each non-OpenAI provider; the old shared model value is not reused across providers.
 
 DALL·E always uses the OpenAI API key, regardless of the chat provider. The OpenAI organization ID is likewise only sent to OpenAI. Existing OpenAI settings remain compatible; the chat keyword defaults to `ask`. The non-OpenAI providers share one **Chat API Key** field, so update it when switching providers. Qwen and Volcengine Ark use their Beijing endpoints; use **Other** to specify a different region or workspace URL. Perplexity Router requires a [Router model ID](https://docs.perplexity.ai/docs/getting-started/quickstart), not a Sonar model ID.
 

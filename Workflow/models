@@ -1,0 +1,155 @@
+#!/usr/bin/osascript -l JavaScript
+
+function envVar(name) {
+  return $.NSProcessInfo.processInfo.environment.objectForKey(name).js
+}
+
+function fileExists(path) {
+  return $.NSFileManager.defaultManager.fileExistsAtPath(path)
+}
+
+function readJSON(path) {
+  const content = $.NSString.stringWithContentsOfFileEncodingError(path, $.NSUTF8StringEncoding, undefined).js
+  return JSON.parse(content)
+}
+
+function writeJSON(path, value) {
+  $(JSON.stringify(value)).writeToFileAtomicallyEncodingError(path, true, $.NSUTF8StringEncoding, undefined)
+}
+
+function makeDir(path) {
+  $.NSFileManager.defaultManager.createDirectoryAtPathWithIntermediateDirectoriesAttributesError(
+    path, true, undefined, undefined)
+}
+
+function modelEndpoint(provider) {
+  const endpoints = {
+    deepseek: "https://api.deepseek.com/models",
+    openrouter: "https://openrouter.ai/api/v1/models",
+    qwen: "https://dashscope.aliyuncs.com/compatible-mode/v1/models",
+    moonshot: "https://api.moonshot.cn/v1/models",
+    siliconflow: "https://api.siliconflow.cn/v1/models",
+    xai: "https://api.x.ai/v1/models",
+    mistral: "https://api.mistral.ai/v1/models",
+    perplexity: "https://api.perplexity.ai/router/v1/models",
+    glm: "https://open.bigmodel.cn/api/paas/v4/models",
+    doubao: "https://ark.cn-beijing.volces.com/api/v3/models"
+  }
+  if (endpoints[provider]) return endpoints[provider]
+  if (provider !== "openai" && provider !== "custom") return ""
+
+  const chatEndpoint = provider === "openai" ?
+    envVar("chatgpt_api_endpoint") || "https://api.openai.com/v1/chat/completions" :
+    envVar("chat_api_endpoint")
+  if (!/^https:\/\/[^/?#\s]+(?:\/[^?#\s]*)?$/.test(chatEndpoint || "")) return ""
+  const base = chatEndpoint.replace(/\/+$/, "")
+  if (base.endsWith("/chat/completions")) return base.replace(/\/chat\/completions$/, "/models")
+  const path = base.replace(/^https:\/\/[^/]+/, "")
+  return `${base}${path ? "" : "/v1"}/models`
+}
+
+function modelList(payload) {
+  const entries = Array.isArray(payload.data) ? payload.data :
+    Array.isArray(payload.models) ? payload.models : []
+  return entries
+    .filter(item => {
+      if (!item || typeof item.id !== "string" || item.id.length === 0) return false
+      const outputs = item.output_modalities || item.architecture?.output_modalities
+      return !Array.isArray(outputs) || outputs.includes("text")
+    })
+    .map(item => ({ id: item.id, name: typeof item.name === "string" ? item.name : item.id }))
+}
+
+function fetchModels(endpoint, key, provider) {
+  const task = $.NSTask.alloc.init
+  const output = $.NSPipe.pipe
+  task.executableURL = $.NSURL.fileURLWithPath("/usr/bin/curl")
+  const args = [
+    endpoint, "--silent", "--show-error", "--max-time", "12",
+    "--header", `Authorization: Bearer ${key}`
+  ]
+  if (provider === "openai" && envVar("openai_org_id"))
+    args.push("--header", `OpenAI-Organization: ${envVar("openai_org_id")}`)
+  task.arguments = args
+  task.standardOutput = output
+  task.standardError = output
+  task.launchAndReturnError(false)
+  const data = output.fileHandleForReading.readDataToEndOfFileAndReturnError(false)
+  const body = $.NSString.alloc.initWithDataEncoding(data, $.NSUTF8StringEncoding).js
+  if (task.terminationStatus !== 0) throw new Error(body.trim() || "Could not connect to model API")
+  const payload = JSON.parse(body)
+  if (payload.error) throw new Error(payload.error.message || "Model API returned an error")
+  const models = modelList(payload)
+  if (models.length === 0) throw new Error("Model API returned no compatible model IDs")
+  return models
+}
+
+function modelItems(models, query, selected) {
+  const search = query.toLowerCase()
+  const matching = models
+    .filter(model => `${model.id} ${model.name}`.toLowerCase().includes(search))
+    .sort((a, b) => (a.id === selected ? -1 : b.id === selected ? 1 : a.id.localeCompare(b.id)))
+    .slice(0, 50)
+    .map(model => ({
+      title: model.name,
+      subtitle: model.id === selected ? `${model.id} - Selected` : model.id,
+      arg: model.id,
+      match: `${model.id} ${model.name}`
+    }))
+
+  if (query && matching.length === 0) matching.push({
+    title: `Use model ID: ${query}`,
+    subtitle: "Select an exact model ID manually",
+    arg: query
+  })
+  return matching
+}
+
+function run(argv) {
+  const provider = envVar("chat_provider") || "openai"
+  const query = (argv[0] || "").trim()
+  const key = provider === "openai" ? envVar("openai_api_key") : envVar("chat_api_key")
+  const endpoint = modelEndpoint(provider)
+  if (!key) return JSON.stringify({ items: [{ title: "Set the API key in Workflow Configuration", valid: false }] })
+  if (!endpoint) return JSON.stringify({ items: [{ title: "Set a valid Chat API Endpoint", valid: false }] })
+
+  const selectionPath = `${envVar("alfred_workflow_data")}/models.json`
+  const selectionKey = provider === "custom" ? `custom:${envVar("chat_api_endpoint")}` : provider
+  let selections = {}
+  try { if (fileExists(selectionPath)) selections = readJSON(selectionPath) } catch {}
+
+  const cacheDir = envVar("alfred_workflow_cache")
+  const cachePath = `${cacheDir}/models-${provider}.json`
+  let models
+  let error
+  let cached
+  try { if (fileExists(cachePath)) cached = readJSON(cachePath) } catch {}
+  try {
+    if (cached && cached.endpoint === endpoint && Array.isArray(cached.models) &&
+        Date.now() - cached.fetchedAt < 300000) {
+      models = cached.models
+    } else if (cached && cached.endpoint === endpoint && cached.error &&
+               Date.now() - cached.fetchedAt < 30000) {
+      error = cached.error
+    } else {
+      models = fetchModels(endpoint, key, provider)
+      try {
+        makeDir(cacheDir)
+        writeJSON(cachePath, { endpoint, fetchedAt: Date.now(), models })
+      } catch {}
+    }
+  } catch (failure) {
+    error = failure.message || String(failure)
+    try {
+      makeDir(cacheDir)
+      writeJSON(cachePath, { endpoint, fetchedAt: Date.now(), error })
+    } catch {}
+  }
+
+  const items = models ? modelItems(models, query, selections[selectionKey]) : []
+  if (error) items.unshift({ title: "Could not load models", subtitle: error.slice(0, 180), valid: false })
+  if (!models && query) items.push({ title: `Use model ID: ${query}`, arg: query,
+    subtitle: "Select an exact model ID manually" })
+  if (items.length === 0) items.push({ title: "No matching models", valid: false })
+  return JSON.stringify({ items })
+}

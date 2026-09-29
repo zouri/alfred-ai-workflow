@@ -6,9 +6,18 @@ const vm = require("node:vm")
 
 const script = readFileSync(join(__dirname, "../Workflow/chatgpt"), "utf8")
 
-function configuration(variables) {
+function configuration(variables, selections) {
   const context = {
     $: {
+      NSFileManager: {
+        defaultManager: {
+          fileExistsAtPath: () => selections !== undefined
+        }
+      },
+      NSString: {
+        stringWithContentsOfFileEncodingError: () => ({ js: JSON.stringify(selections) })
+      },
+      NSUTF8StringEncoding: 4,
       NSProcessInfo: {
         processInfo: {
           environment: {
@@ -51,14 +60,29 @@ test("provider presets use their Chat Completions endpoints", () => {
   }
 
   for (const [provider, endpoint] of Object.entries(endpoints)) {
-    const config = configuration({ chat_provider: provider, chat_api_key: "provider-key", chat_model: "model-id" })
+    const config = configuration({ chat_provider: provider, chat_api_key: "provider-key" }, { [provider]: "model-id" })
     assert.equal(config.endpoint, endpoint, provider)
     assert.equal(config.model, "model-id", provider)
     assert.equal(config.key, "provider-key", provider)
     assert.equal(config.headers.length, 0, provider)
-    assert.match(configuration({ chat_provider: provider, chat_api_key: "provider-key" }).error,
-      /Chat Model/, provider)
+    assert.match(configuration({ chat_provider: provider, chat_api_key: "provider-key", chat_model: "old-model" }).error,
+      /askmodel/, provider)
   }
+})
+
+test("switching providers uses each provider's saved model", () => {
+  const selections = { qwen: "qwen-plus", openrouter: "openai/gpt-4o" }
+  assert.equal(configuration({ chat_provider: "qwen", chat_api_key: "key" }, selections).model, "qwen-plus")
+  assert.equal(configuration({ chat_provider: "openrouter", chat_api_key: "key" }, selections).model, "openai/gpt-4o")
+  assert.equal(configuration({ chat_provider: "deepseek", chat_api_key: "key" }, selections).model, "deepseek-flash")
+})
+
+test("custom model selections are scoped to the endpoint", () => {
+  const variables = { chat_provider: "custom", chat_api_key: "key", chat_api_endpoint: "https://one.example/v1" }
+  const selections = { "custom:https://one.example/v1": "model-one" }
+  assert.equal(configuration(variables, selections).model, "model-one")
+  assert.match(configuration({ ...variables, chat_api_endpoint: "https://two.example/v1" }, selections).error,
+    /askmodel/)
 })
 
 test("custom provider accepts a base URL or a complete endpoint", () => {
@@ -71,7 +95,7 @@ test("custom provider accepts a base URL or a complete endpoint", () => {
 
 test("missing settings fail before starting a request", () => {
   assert.match(configuration({ chat_provider: "deepseek" }).error, /Chat API Key/)
-  assert.match(configuration({ chat_provider: "custom", chat_api_key: "key" }).error, /Chat Model/)
+  assert.match(configuration({ chat_provider: "custom", chat_api_key: "key" }).error, /askmodel/)
   assert.match(configuration({ chat_provider: "custom", chat_api_key: "key", chat_model: "model" }).error, /Chat API Endpoint/)
   assert.match(configuration({ chat_provider: "custom", chat_api_key: "key", chat_model: "model", chat_api_endpoint: "http://example.com" }).error, /HTTPS/)
 })

@@ -6,6 +6,32 @@
 	<string>com.zouri.alfred-ai-workflow</string>
 	<key>connections</key>
 	<dict>
+		<key>169A246A-011F-4645-9BB5-6DC3F5FBF7A8</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>24B49797-1C90-406A-91B2-707A11C3B02D</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<true/>
+			</dict>
+		</array>
+		<key>24B49797-1C90-406A-91B2-707A11C3B02D</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>AA5D10D7-4EB5-4F4C-AF97-0AC72D6DC0FA</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 		<key>002874FF-3AE4-4E8F-A4F8-65844E5D6CFB</key>
 		<array>
 			<dict>
@@ -1932,16 +1958,106 @@ function run() {
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string>askmodel</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string>Loading models...</string>
+				<key>script</key>
+				<string></string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string>models</string>
+				<key>skipuniversalaction</key>
+				<true/>
+				<key>subtext</key>
+				<string>Search models from the selected chat provider</string>
+				<key>title</key>
+				<string>Select Chat Model</string>
+				<key>type</key>
+				<integer>7</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>169A246A-011F-4645-9BB5-6DC3F5FBF7A8</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string></string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string>select-model</string>
+				<key>type</key>
+				<integer>7</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>24B49797-1C90-406A-91B2-707A11C3B02D</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>lastpathcomponent</key>
+				<false/>
+				<key>onlyshowifquerypopulated</key>
+				<false/>
+				<key>removeextension</key>
+				<false/>
+				<key>text</key>
+				<string>{query}</string>
+				<key>title</key>
+				<string>Chat model selected</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.notification</string>
+			<key>uid</key>
+			<string>AA5D10D7-4EB5-4F4C-AF97-0AC72D6DC0FA</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
 	</array>
 	<key>readme</key>
 	<string>## Setup
 
 In the [Workflow Configuration](https://www.alfredapp.com/help/workflows/user-configuration/), choose a **Chat Provider**:
 
-* **OpenAI** (default): Set an [OpenAI API key](https://platform.openai.com/api-keys) and choose an **OpenAI Model**.
-* **DeepSeek**: Set a [DeepSeek API key](https://platform.deepseek.com/api_keys) in **Chat API Key**. The default chat model is `deepseek-flash`; use **Chat Model** to override it.
-* **OpenRouter, Qwen (Alibaba Cloud), Moonshot (Kimi), SiliconFlow, xAI, Mistral, Perplexity Router, Zhipu GLM, or Volcengine Ark (Doubao)**: Set that provider's key in **Chat API Key** and its model ID in **Chat Model**. The workflow supplies the provider's Chat Completions endpoint.
-* **Other OpenAI-compatible API**: Set **Chat API Key**, **Chat API Endpoint**, and **Chat Model**. The endpoint can be an HTTPS base URL or a full `/chat/completions` URL. The provider must support streamed Chat Completions responses.
+* **OpenAI** (default): Set an [OpenAI API key](https://platform.openai.com/api-keys).
+* **DeepSeek, OpenRouter, Qwen, Moonshot, SiliconFlow, xAI, Mistral, Perplexity Router, Zhipu GLM, or Volcengine Ark**: Set that provider's key in **Chat API Key**.
+* **Other OpenAI-compatible API**: Set **Chat API Key** and **Chat API Endpoint**. The endpoint can be an HTTPS base URL or a full `/chat/completions` URL.
+
+After choosing a provider, run `askmodel` in Alfred to fetch and select one of its models. The choice is saved separately for each provider. If the model list is unavailable, type an exact model ID after `askmodel` and select the manual entry. **OpenAI Model** and **Custom Model** are fallbacks when no model has been selected. After upgrading, select a model once for each non-OpenAI provider; the old shared model value is not reused across providers.
 
 DALL·E always uses the OpenAI API key, regardless of the chat provider. Existing OpenAI settings remain compatible; the chat keyword defaults to `ask`. Non-OpenAI providers share one **Chat API Key** field; update it when switching providers. Qwen and Volcengine Ark use Beijing endpoints; use **Other** for a different region or workspace URL. Perplexity Router requires a Router model ID, not a Sonar model ID.
 
@@ -2352,6 +2468,27 @@ Query DALL·E via the `dalle` keyword.
 			<key>ypos</key>
 			<real>190</real>
 		</dict>
+		<key>169A246A-011F-4645-9BB5-6DC3F5FBF7A8</key>
+		<dict>
+			<key>xpos</key>
+			<real>65</real>
+			<key>ypos</key>
+			<real>1270</real>
+		</dict>
+		<key>24B49797-1C90-406A-91B2-707A11C3B02D</key>
+		<dict>
+			<key>xpos</key>
+			<real>310</real>
+			<key>ypos</key>
+			<real>1270</real>
+		</dict>
+		<key>AA5D10D7-4EB5-4F4C-AF97-0AC72D6DC0FA</key>
+		<dict>
+			<key>xpos</key>
+			<real>550</real>
+			<key>ypos</key>
+			<real>1270</real>
+		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
 	<array>
@@ -2454,16 +2591,16 @@ Query DALL·E via the `dalle` keyword.
 				<key>default</key>
 				<string></string>
 				<key>placeholder</key>
-				<string>e.g. deepseek-flash</string>
+				<string>Exact model ID for Other</string>
 				<key>required</key>
 				<false/>
 				<key>trim</key>
 				<true/>
 			</dict>
 			<key>description</key>
-			<string>DeepSeek defaults to deepseek-flash. Required for other non-OpenAI providers.</string>
+			<string>Manual fallback for Other; use askmodel to select a model for each provider.</string>
 			<key>label</key>
-			<string>Chat Model</string>
+			<string>Custom Model</string>
 			<key>type</key>
 			<string>textfield</string>
 			<key>variable</key>
@@ -2567,7 +2704,7 @@ Query DALL·E via the `dalle` keyword.
 				</array>
 			</dict>
 			<key>description</key>
-			<string>Used when Chat Provider is OpenAI.</string>
+			<string>Fallback for OpenAI when no model has been selected with askmodel.</string>
 			<key>label</key>
 			<string>OpenAI Model</string>
 			<key>type</key>
@@ -2813,7 +2950,7 @@ Query DALL·E via the `dalle` keyword.
 		<string>https://api.openai.com/v1/images/generations</string>
 	</dict>
 	<key>version</key>
-	<string>26.1</string>
+	<string>26.1.1</string>
 	<key>webaddress</key>
 	<string>https://github.com/zouri/alfred-ai-workflow/</string>
 </dict>

@@ -38,6 +38,18 @@ function appendChat(path, message) {
   writeFile(path, chatString)
 }
 
+function selectedModel(provider) {
+  const path = `${envVar("alfred_workflow_data")}/models.json`
+  if (!fileExists(path)) return ""
+  try {
+    const selections = readChat(path)
+    const key = provider === "custom" ? `custom:${envVar("chat_api_endpoint")}` : provider
+    return selections[key] || ""
+  } catch {
+    return ""
+  }
+}
+
 function markdownChat(messages, ignoreLastInterrupted = true) {
   return messages.reduce((accumulator, current, index, allMessages) => {
     if (current["role"] === "assistant")
@@ -60,6 +72,7 @@ function markdownChat(messages, ignoreLastInterrupted = true) {
 
 function chatConfiguration() {
   const provider = envVar("chat_provider") || "openai"
+  const chosenModel = selectedModel(provider)
   const openaiEndpoint = envVar("chatgpt_api_endpoint") || "https://api.openai.com/v1/chat/completions"
   // Chat Completions endpoints for providers listed in new-api's channel presets.
   const providerEndpoints = {
@@ -78,25 +91,25 @@ function chatConfiguration() {
     openai: {
       key: envVar("openai_api_key"),
       endpoint: openaiEndpoint,
-      model: envVar("chatgpt_model_override") || envVar("gpt_model"),
+      model: chosenModel || envVar("chatgpt_model_override") || envVar("gpt_model"),
       headers: envVar("openai_org_id") ? ["--header", `OpenAI-Organization: ${envVar("openai_org_id")}`] : []
     },
     custom: {
       key: envVar("chat_api_key"),
       endpoint: envVar("chat_api_endpoint"),
-      model: envVar("chat_model"),
+      model: chosenModel || envVar("chat_model"),
       headers: []
     }
   }[provider] || (providerEndpoints[provider] ? {
     key: envVar("chat_api_key"),
     endpoint: providerEndpoints[provider],
-    model: envVar("chat_model") || (provider === "deepseek" ? "deepseek-flash" : ""),
+    model: chosenModel || (provider === "deepseek" ? "deepseek-flash" : ""),
     headers: []
   } : undefined)
 
   if (!settings) return { error: `Unknown chat provider: ${provider}` }
   if (!settings.key) return { error: `Set the ${provider === "openai" ? "OpenAI API Key" : "Chat API Key"} in Workflow Configuration.` }
-  if (!settings.model) return { error: "Set the Chat Model in Workflow Configuration." }
+  if (!settings.model) return { error: "Run askmodel in Alfred to select a model for this provider." }
   if (!settings.endpoint) return { error: "Set the Chat API Endpoint in Workflow Configuration." }
 
   const endpoint = settings.endpoint.replace(/\/+$/, "")
