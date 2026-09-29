@@ -43,7 +43,11 @@ test("provider presets use their Chat Completions endpoints", () => {
     qwen: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
     moonshot: "https://api.moonshot.cn/v1/chat/completions",
     siliconflow: "https://api.siliconflow.cn/v1/chat/completions",
-    xai: "https://api.x.ai/v1/chat/completions"
+    xai: "https://api.x.ai/v1/chat/completions",
+    mistral: "https://api.mistral.ai/v1/chat/completions",
+    perplexity: "https://api.perplexity.ai/router/v1/chat/completions",
+    glm: "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+    doubao: "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
   }
 
   for (const [provider, endpoint] of Object.entries(endpoints)) {

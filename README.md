@@ -10,12 +10,12 @@ In the [Workflow Configuration](https://www.alfredapp.com/help/workflows/user-co
 
 * **OpenAI** (default): Set an [OpenAI API key](https://platform.openai.com/api-keys) and choose an **OpenAI Model**.
 * **DeepSeek**: Set a [DeepSeek API key](https://platform.deepseek.com/api_keys) in **Chat API Key**. The default chat model is `deepseek-flash`; use **Chat Model** to override it.
-* **OpenRouter, Qwen (Alibaba Cloud), Moonshot (Kimi), SiliconFlow, or xAI**: Set that provider's key in **Chat API Key** and its model ID in **Chat Model**. The workflow supplies the provider's Chat Completions endpoint.
+* **OpenRouter, Qwen (Alibaba Cloud), Moonshot (Kimi), SiliconFlow, xAI, Mistral, Perplexity Router, Zhipu GLM, or Volcengine Ark (Doubao)**: Set that provider's key in **Chat API Key** and its model ID in **Chat Model**. The workflow supplies the provider's Chat Completions endpoint.
 * **Other OpenAI-compatible API**: Set **Chat API Key**, **Chat API Endpoint**, and **Chat Model**. The endpoint can be an HTTPS base URL (such as `https://api.example.com/v1`) or a full `/chat/completions` URL. The provider must support streamed Chat Completions responses.
 
-DALL·E always uses the OpenAI API key, regardless of the chat provider. The OpenAI organization ID is likewise only sent to OpenAI. Existing OpenAI settings and the `chatgpt` keyword continue to work. The non-OpenAI providers share one **Chat API Key** field, so update it when switching providers. Qwen uses the Beijing endpoint; use **Other** to specify a different region or workspace URL.
+DALL·E always uses the OpenAI API key, regardless of the chat provider. The OpenAI organization ID is likewise only sent to OpenAI. Existing OpenAI settings and the `chatgpt` keyword continue to work. The non-OpenAI providers share one **Chat API Key** field, so update it when switching providers. Qwen and Volcengine Ark use their Beijing endpoints; use **Other** to specify a different region or workspace URL. Perplexity Router requires a [Router model ID](https://docs.perplexity.ai/docs/getting-started/quickstart), not a Sonar model ID.
 
-These presets are a small subset of the [new-api channel list](https://github.com/QuantumNous/new-api/blob/main/constant/channel.go). Providers using a different request protocol or authentication scheme are not included.
+These presets are a subset of the [new-api channel list](https://github.com/QuantumNous/new-api/blob/main/constant/channel.go), restricted to HTTPS Chat Completions endpoints with Bearer-key authentication. Providers using a different request protocol or authentication scheme are not included.
 
 ## Usage
 
